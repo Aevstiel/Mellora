@@ -31,8 +31,13 @@ let currentMatrix = null;
 
 // Store individual filter values.
 let brightness = 100;
+let saturation = 100;
 let contrast = 100;
+let grayscale = 0;
+let haze = 0;
 let opacity = 100;
+let warm = 100;
+let inversion = 0;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,8 +107,13 @@ fileInput.addEventListener("change", () => {
 
         // Reset all filter values when a new image is uploaded.
         brightness = 100;
+        saturation = 100;
         contrast = 100;
+        grayscale = 0;
+        haze = 0;
         opacity = 100;
+        warm = 100;
+        inversion = 0;
 
         // Reset the interface to Brightness.
         filterOptions.forEach(option => {
@@ -257,6 +267,53 @@ function applyContrast(matrix, contrast) {
     };
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GRAYSCALE
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function applyGrayscale(matrix, grayscale) {
+
+    // Create an independent copy of the pixel data.
+    const result = new Uint8ClampedArray(matrix.pixels);
+
+    // Convert the slider percentage into a factor between 0 and 1.
+    const factor = grayscale / 100;
+
+    // Iterate through every pixel.
+    for (let i = 0; i < result.length; i += 4) {
+
+        // Retrieve the original RGB values.
+        const red = result[i];
+        const green = result[i + 1];
+        const blue = result[i + 2];
+
+        // Calculate the grayscale intensity.
+        const luminance =
+            0.299 * red +
+            0.587 * green +
+            0.114 * blue;
+
+        // Gradually interpolate between the original colour
+        // and the grayscale intensity.
+
+        result[i] = red * (1 - factor) + luminance * factor;
+
+        result[i + 1] =
+            green * (1 - factor) + luminance * factor;
+
+        result[i + 2] =
+            blue * (1 - factor) + luminance * factor;
+
+        // Alpha remains unchanged.
+    }
+
+    // Return the processed matrix.
+    return {
+        width: matrix.width,
+        height: matrix.height,
+        pixels: result
+    };
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // OPACITY
@@ -308,6 +365,7 @@ function processImage() {
     // Apply all filters in a consistent order.
     result = applyBrightness(result, brightness);
     result = applyContrast(result, contrast);
+    result = applyGrayscale(result, grayscale);
     result = applyOpacity(result, opacity);
 
     // Store the final result.
@@ -378,7 +436,6 @@ filterOptions.forEach(option => {
         // Update the filter name.
         filterName.innerText = option.innerText;
 
-        // Configure the slider for Brightness.
         if (option.id === "brightness") {
 
             filterSlider.min = 0;
@@ -389,7 +446,6 @@ filterOptions.forEach(option => {
 
         }
 
-        // Configure the slider for Contrast.
         else if (option.id === "contrast") {
 
             filterSlider.min = 0;
@@ -400,7 +456,16 @@ filterOptions.forEach(option => {
 
         }
 
-        // Configure the slider for Opacity.
+        else if (option.id === "grayscale") {
+
+            filterSlider.min = 0;
+            filterSlider.max = 100;
+            filterSlider.value = grayscale;
+
+            filterValue.innerText = grayscale + "%";
+
+        }
+
         else if (option.id === "opacity") {
 
             filterSlider.min = 0;
@@ -443,6 +508,10 @@ function updateFilter() {
     } else if (selectedFilter.id === "contrast") {
 
         contrast = value;
+
+    } else if (selectedFilter.id === "grayscale") {
+
+        grayscale = value;
 
     } else if (selectedFilter.id === "opacity") {
 
