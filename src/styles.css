@@ -1,0 +1,286 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+body {
+  color: #D2BDDB;
+  background: #080110;
+  min-height: 100vh;
+  overflow: hidden;
+}
+.main {
+  margin-top: 5em;
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.editor-container {
+  width: 850px;
+  padding: 30px 35px 35px;
+  background: #0F0915;
+  border-radius: 25px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: 0.2s;
+}
+.editor-container.disable .editor-panel,
+.editor-container.disable .filter-controls .reset-filter,
+.editor-container.disable .filter-controls .save-img {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.editor-container h2 {
+  margin-top: -8px;
+  font-size: 22px;
+  font-weight: 500;
+}
+.editor-container .wrapper {
+  display: flex;
+  margin: 20px 0;
+  min-height: 335px;
+}
+.wrapper .editor-panel {
+  padding: 15px 20px;
+  width: 280px;
+  border-radius: 15px;
+  border: 1px solid #55455A;
+}
+.editor-panel .title {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.editor-panel .options,
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.editor-panel button {
+  outline: none;
+  height: 40px;
+  font-size: 14px;
+  color: #A893B2;
+  background: #040206;
+  border-radius: 5555px;
+  margin-bottom: 8px;
+  border: 1px solid #55455A;
+  transition: 0.15s;
+}
+.editor-panel .filter button {
+  width: 49%;
+}
+.editor-panel button:hover {
+  color: #FAB991;
+  border-color: #FAB991;
+  transition: 0.15s;
+  box-shadow: 0px 0px 2px #FAB991;
+}
+.filter button.active {
+  color: #040206;
+  border-color: #FAB991;
+  background: #FAB991;
+}
+.filter .slider {
+  margin-top: 12px;
+}
+.filter .slider .filter-info {
+  display: flex;
+  color: #deabab;
+  font-size: 14px;
+  justify-content: space-between;
+}
+.filter .slider input {
+  width: 100%;
+  height: 5px;
+  accent-color: #FAB991;
+  transition: 0.2s;
+}
+
+/*le doigt d'la sale pute arabe*/
+input[type="range"] {
+    --progress: 0%;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 100%;
+    height: 20px;
+    margin: 0;
+
+    background: transparent;
+    cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px;
+    border-radius: 999px;
+
+    background: linear-gradient(
+        to right,
+        #E3BFF2 0%,
+        #E3BFF2 var(--progress),
+        #3F3144 var(--progress),
+        #3F3144 100%
+    );
+}
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 14px;
+    height: 14px;
+    margin-top: -4.5px;
+
+    border-radius: 50%;
+    background: #AC5ED6;
+    border: none;
+
+    cursor: grab;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 5px rgb(172 94 214 / 20%);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+}
+input[type="range"]::-moz-range-track {
+    height: 5px;
+    border-radius: 999px;
+    background: #3F3144;
+}
+input[type="range"]::-moz-range-progress {
+    height: 5px;
+    border-radius: 999px;
+    background: #E3BFF2;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+    background: #AC5ED6;
+    border: none;
+
+    cursor: grab;
+}
+/*lafin*/
+
+.editor-panel .rotate {
+  margin-top: 17px;
+}
+.editor-panel .rotate button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24%;
+}
+.rotate .options button:nth-child(3),
+.rotate .options button:nth-child(4) {
+  font-size: 18px;
+}
+.rotate .options button:active {
+  color: #fff;
+  background: #FAB991;
+  border-color: #FAB991;
+}
+.wrapper .preview-img {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: 20px;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-img img {
+  max-width: 490px;
+  max-height: 405px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.color-filters {
+  display: flex;
+  vertical-align: center;
+  align-items: center;
+  justify-content: space-between;
+}
+.color-filters div {
+  width: 24%;
+  text-align: center;
+  padding: 0.5rem 0rem;
+}
+.filter-controls button {
+  padding: 11px 20px;
+  font-size: 14px;
+  border-radius: 5555px;
+  outline: none;
+  color: #0F0915;
+  cursor: pointer;
+  background: none;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+.filter-controls .reset-filter {
+  color: #55455A;
+  border: 1px solid #55455A;
+}
+.filter-controls .reset-filter:hover {
+  color: #fff;
+  border-color: #CC4B63;
+  background: #CC4B63;
+}
+.filter-controls .choose-img {
+  background: #AC5ED6;
+  border: 1px solid #55455A;
+}
+.filter-controls .choose-img:hover {
+  background: #0F0915;
+  color: #AC5ED6;
+  border: 1px solid #AC5ED6;
+  transition: 0.15s
+}
+.filter-controls .save-img {
+  margin-left: 5px;
+  background: #FAB991;
+  border: 1px solid #FAB991;
+}
+.filter-controls .save-img:hover {
+  background: #0F0915;
+  color: #FAB991;
+  border: 1px solid #FAB991;
+  transition: 0.15s
+}
+
+@media screen and (max-width: 760px) {
+  .editor-container {
+    padding: 25px;
+  }
+  .editor-container .wrapper {
+    flex-wrap: wrap-reverse;
+  }
+  .wrapper .editor-panel {
+    width: 100%;
+  }
+  .wrapper .preview-img {
+    width: 100%;
+    margin: 0 0 15px;
+  }
+}
+@media screen and (max-width: 500px) {
+  .filter-controls button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .filter-controls .filter-row {
+    width: 100%;
+  }
+  .filter-controls .filter-row .save-img {
+    margin-left: 0px;
+  }
+}
