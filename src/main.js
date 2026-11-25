@@ -1,3 +1,4 @@
+import convert from "color-convert";
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // DOM ELEMENTS
@@ -221,6 +222,48 @@ function applyBrightness(matrix, brightness) {
     };
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// SATURATION
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function applySaturation(matrix, saturation) {
+    const pixels = new Uint8ClampedArray(matrix.pixels);
+    const factor = saturation / 100;
+
+    for (let i = 0; i < pixels.length; i += 4) {
+        const red = pixels[i];
+        const green = pixels[i + 1];
+        const blue = pixels[i + 2];
+
+        // We used a libary we imported to convert RGB (red, green, and blue entries for each vector) 
+        // to HSV (hue, saturation, and value entries for each vector in the matrix) 
+
+        // Note:
+        // We don't touch the fourth entry "Alpha" as HSV is only concerned with the represenation of colour
+
+        // Basically, we temporarily replace the RGB components with their corresponding HSV components, 
+        // which together represent the same pixel when converted back.     
+
+        // We do this temporarily to edit the saturation without using complex algorithms that would introduce unnecessary complexity
+        const hsv = convert.rgb.hsv(red, green, blue);
+       
+        // Arrays start from 0 so we pick 1 which is the second component, it corresponds to saturation
+        hsv[1] = Math.min(100, hsv[1] * factor);
+
+        // We convert our HSV vectors back to RGB ones in order to render it properly
+        const rgb = convert.hsv.rgb(hsv);
+
+        pixels[i] = rgb[0];
+        pixels[i + 1] = rgb[1];
+        pixels[i + 2] = rgb[2];
+    }
+
+    return {
+        width: matrix.width,
+        height: matrix.height,
+        pixels: pixels
+    };
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // CONTRAST
@@ -364,6 +407,7 @@ function processImage() {
 
     // Apply all filters in a consistent order.
     result = applyBrightness(result, brightness);
+    result = applySaturation(result, saturation);
     result = applyContrast(result, contrast);
     result = applyGrayscale(result, grayscale);
     result = applyOpacity(result, opacity);
@@ -446,6 +490,16 @@ filterOptions.forEach(option => {
 
         }
 
+        else if (option.id === "saturation") {
+
+            filterSlider.min = 0;
+            filterSlider.max = 200;
+            filterSlider.value = saturation;
+
+            filterValue.innerText = saturation + "%";
+
+        }
+
         else if (option.id === "contrast") {
 
             filterSlider.min = 0;
@@ -504,6 +558,10 @@ function updateFilter() {
     if (selectedFilter.id === "brightness") {
 
         brightness = value;
+
+    } else if (selectedFilter.id === "saturation") {
+
+        saturation = value;
 
     } else if (selectedFilter.id === "contrast") {
 
