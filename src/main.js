@@ -14,23 +14,22 @@ const filterOptions = document.querySelectorAll(".filter button");
 const filterName = document.querySelector(".filter-info .name");
 const filterSlider = document.querySelector(".slider input");
 const filterValue = document.querySelector(".filter-info .value");
+const rotateOptions = document.querySelectorAll(".rotate button");
 
+const resetFilterBtn = document.querySelector(".reset-filter");
+const saveImgBtn = document.querySelector(".save-img");
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // IMAGE PROCESSING VARIABLES
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// Original image dimensions
 let imageWidth = 0;
 let imageHeight = 0;
 
-// Original image data.
 let originalMatrix = null;
 
-// Currently displayed image data
 let currentMatrix = null;
 
-// Store individual filter values.
 let brightness = 100;
 let saturation = 100;
 let contrast = 100;
@@ -39,6 +38,10 @@ let warmth = 100;
 let opacity = 100;
 let hue = 100;
 let inversion = 0;
+
+let rotation = 0;
+let flipHorizontal = 1;
+let flipVertical = 1;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,6 +118,9 @@ fileInput.addEventListener("change", () => {
         opacity = 100;
         hue = 100;
         inversion = 0;
+        rotation = 0;
+        flipHorizontal = 1;
+        flipVertical = 1;
 
         // Reset the interface to Brightness.
         filterOptions.forEach(option => {
@@ -481,6 +487,38 @@ function applyInversion(matrix, inversion) {
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ROTATION AND FLIPPING
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rotateOptions.forEach(option => {
+
+    option.addEventListener("click", () => {
+
+        if (option.id === "left") {
+
+            rotation -= 90;
+
+        } else if (option.id === "right") {
+
+            rotation += 90;
+
+        } else if (option.id === "horizontal") {
+
+            flipHorizontal *= -1;
+
+        } else if (option.id === "vertical") {
+
+            flipVertical *= -1;
+
+        }
+
+        renderMatrix(currentMatrix);
+
+    });
+
+});
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // APPLY ALL ACTIVE FILTERS
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -524,11 +562,51 @@ function renderMatrix(matrix) {
         matrix.height
     );
 
-    // Write the pixel data onto the canvas.
+    // Write the pixel data onto the processing canvas.
     processingContext.putImageData(imageData, 0, 0);
 
-    // Display the resulting image in the existing HTML preview.
-    previewImg.src = processingCanvas.toDataURL("image/png");
+
+    // Create a separate canvas for transformations.
+    const outputCanvas = document.createElement("canvas");
+
+    const outputContext = outputCanvas.getContext("2d");
+
+
+    // Determine whether the image is rotated sideways.
+    const sideways = Math.abs(rotation % 180) === 90;
+
+
+    // Swap canvas dimensions when rotated by 90 or 270 degrees.
+    outputCanvas.width = sideways ? matrix.height : matrix.width;
+    outputCanvas.height = sideways ? matrix.width : matrix.height;
+
+
+    // Move the origin to the centre of the output canvas.
+    outputContext.translate(
+        outputCanvas.width / 2,
+        outputCanvas.height / 2
+    );
+
+
+    // Apply rotation.
+    outputContext.rotate(rotation * Math.PI / 180);
+
+
+    // Apply horizontal and vertical flipping.
+    outputContext.scale(flipHorizontal, flipVertical);
+
+
+    // Draw the processed image from its centre.
+    outputContext.drawImage(
+        processingCanvas,
+        -matrix.width / 2,
+        -matrix.height / 2
+    );
+
+
+    // Display the transformed image.
+    previewImg.src = outputCanvas.toDataURL("image/png");
+    return outputCanvas;
 }
 
 
@@ -726,6 +804,75 @@ function updateFilter() {
 // Listen for slider movement.
 filterSlider.addEventListener("input", updateFilter);
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// RESET BUTTON
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+resetFilterBtn.addEventListener("click", () => {
+    if (!originalMatrix) return;
+
+    // Reset all filter values.
+    brightness = 100;
+    saturation = 100;
+    contrast = 100;
+    grayscale = 0;
+    warmth = 100;
+    opacity = 100;
+    hue = 100;
+    inversion = 0;
+
+    // Reset transformations.
+    rotation = 0;
+    flipHorizontal = 1;
+    flipVertical = 1;
+
+    // Return the selected filter to Brightness.
+    filterOptions.forEach(option => {
+        option.classList.remove("active");
+    });
+
+    document.querySelector("#brightness").classList.add("active");
+
+    // Restore the slider's Brightness settings.
+    filterName.innerText = "Brightness";
+    filterSlider.min = 0;
+    filterSlider.max = 200;
+    filterSlider.value = brightness;
+    filterValue.innerText = brightness + "%";
+
+    updateProgress(filterSlider);
+
+    // Render the original image with all defaults restored.
+    processImage();
+});
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// SAVE IMAGE
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+saveImgBtn.addEventListener("click", () => {
+    if (!currentMatrix) return;
+
+    const outputCanvas = renderMatrix(currentMatrix);
+
+    outputCanvas.toBlob(blob => {
+        if (!blob) {
+            console.error("Failed to export image.");
+            return;
+        }
+
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        link.download = "Mellora.png";
+        link.href = url;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }, "image/png");
+});
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // INITIAL SLIDER STATE
