@@ -1,0 +1,43 @@
+
+name: Build Mellora for macOS (Apple Silicon)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build macOS ARM64
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Mellora
+        run: npx tauri build --target aarch64-apple-darwin
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mellora-macOS-Apple-Silicon
+          path: src-tauri/target/aarch64-apple-darwin/release/bundle/
+          if-no-files-found: error
+          retention-days: 30
+
